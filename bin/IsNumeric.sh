@@ -19,13 +19,23 @@ IsNumeric() {
 	#	otherwise, it will return false (1).
 	#
 	if [ $# -ne 1 ]; then
-		return 1
+		echo "Usage: IsNumeric string" 1>&2
+		exit 1
 	fi
 
-	expr "$1" + 1 >/dev/null 2>&1
-	if [ $? -ge 2 ]; then
-		return 1
-	fi
+	case "$1" in
+		0[xX]* )
+			# Hexadecimal
+			echo "$1" | sed "s/^0[xX]//" |
+				grep -q '^[a-fA-F0-9][a-fA-F0-9]*$'
+			;;
 
-	return 0
+		0* )	# Octal
+			echo "$1" | grep -q '^[0-7][0-7]*$'
+			;;
+
+		* )	# Decimal
+			echo "$1" | grep -q '^[0-9][0-9]*$'
+			;;
+	esac
 }

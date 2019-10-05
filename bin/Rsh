@@ -1,0 +1,137 @@
+#!/bin/sh
+#
+# Copyright (c) 2008 by Bruce Blinn
+#
+# NAME
+#	Rsh - execute a command on a remote system
+#
+# SYNOPSIS
+#	Rsh [-n] [-l userName] hostName command
+#
+# DESCRIPTION
+#	This command will execute the command on a remote system.
+#	It is similar to rsh or remsh, except the return status of
+#	this command will be the return status from the command
+#	executed on the remote command, not the return status of the
+#	remote shell command.
+#
+#	This command is not necessary if you are using the ssh(1)
+#	command because the ssh command already returns the exit
+#	status of the command that it executes.
+#
+# OPTIONS
+#	-l userName
+#
+#	-n	This option connects the standard input to
+#		/dev/null.
+#
+# RETURN VALUE
+#	The exit status if this command will be the exit status of
+#	the command executed on the remote system.  However, if this
+#	command has trouble accessing the remote system, it will
+#	return an exit status in the range 90-99.
+#
+####################################################################
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [-n] [-l userName] hostName command"
+N_OPT=				# -n option of rsh(1).
+RCP_USERNAME=			# User name option for rcp(1).
+RSH_USERNAME=			# User name option for rsh(1).
+HOSTNAME=			# Name of remote system.
+COMMAND=			# Command to execute.
+PARAMETERS=			# Parameters for remote command.
+RSH=rsh				# Remote shell.
+RCP=rcp				# Remote copy command.
+CMDFILE=/tmp/cmdfile.$$		# Shell script.
+STATFILE=/tmp/statfile.$$	# Status of remote command.
+
+Cleanup() {
+	rm -f /tmp/*.$$;
+	$RSH $RSH_USER_OPT $HOSTNAME rm -f /tmp/*.$$ 2>/dev/null
+}
+
+Quote() {
+	typeset PARMS=
+
+	for P
+	do
+		#
+		# Replace \ with \\
+		# Replace " with \"
+		#
+		PARMS="$PARMS \"$(echo "$P"		|
+				sed 's/\\/\\\\/g'	|
+				sed 's/"/\\"/g')\""
+	done
+
+	# Remove leading space.
+        echo "$PARMS" | sed "s/ //"
+}
+
+trap 'Cleanup' EXIT
+
+while getopts nl: OPT
+do
+	case $OPT in
+		n)	N_OPT="-n"
+			;;
+		l)	RCP_USERNAME="$OPTARG@"
+			RSH_USERNAME="-l $OPTARG"
+			;;
+		\?)	echo "$USAGE" 1>&2
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -lt 2 ]; then
+	echo "$USAGE" 1>&2
+	exit 1
+fi
+
+#
+# Get the command and put quotes around the parameters as necessary.
+#
+HOSTNAME=$1
+shift
+COMMAND=$1
+shift
+if [ $# -gt 0 ]; then
+	PARAMETERS=$(Quote "$@")
+fi
+
+#
+# Create a shell script to execute the command.
+#
+cat <<-EOF >$CMDFILE
+	#!/bin/sh
+	$COMMAND $PARAMETERS
+	echo \$? >$STATFILE
+EOF
+
+chmod +x $CMDFILE
+
+#
+# Copy the command file to the remote system and execute it.
+#
+$RCP $CMDFILE $RCP_USER_OPT$HOSTNAME:$CMDFILE >/dev/null
+if [ $? -ne 0 ]; then
+	echo "$CMDNAME: Cannot copy file to $HOSTNAME." 1>&2
+	exit 97
+fi
+
+$RSH $N_OPT $RSH_USER_OPT $HOSTNAME $CMDFILE
+if [ $? -ne 0 ]; then
+	echo "$CMDNAME: Cannot execute command on $HOSTNAME." 1>&2
+	exit 98
+fi
+
+$RCP $RCP_USER_OPT$HOSTNAME:$STATFILE $STATFILE >/dev/null
+if [ $? -ne 0 ]; then
+	echo "$CMDNAME: Cannot copy file from $HOSTNAME." 1>&2
+	exit 99
+fi
+
+STATUS=$(cat $STATFILE)
+exit $STATUS

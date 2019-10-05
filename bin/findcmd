@@ -28,15 +28,20 @@
 #	2	Command was not found.
 #
 ####################################################################
-CMDNAME=`basename $0`
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME command"
+COMMAND=		# Command being searched for.
 FOUND=FALSE		# Has the command been found?
+OLD_IFS=$IFS		# Original value of IFS variable.
+TMP_PATH=		# For parsing PATH variable.
 
 if [ $# -ne 1 ]; then
-	echo "Usage: $CMDNAME command" 1>&2
+	echo "$USAGE" 1>&2
 	exit 1
 fi
 
 COMMAND=$1
+
 case $COMMAND in
 	*/* )	if [ -x "$COMMAND" -a ! -d "$COMMAND" ]; then
 			echo "$COMMAND"
@@ -44,25 +49,30 @@ case $COMMAND in
 		fi
 		;;
 
-	* )	IFS=:
-		for dir in `echo "$PATH"	|
-			  sed -e 's/^:/.:/'	\
-		  	      -e 's/::/:.:/g'	\
-			      -e 's/:$/:./'`
+	* )	TMP_PATH=$(echo $PATH |
+				sed -e 's/^:/.:/'	\
+				    -e 's/::/:.:/g'	\
+				    -e 's/:$/:./')
+
+		IFS=:
+		set $TMP_PATH
+		IFS=$OLD_IFS
+
+		for dir
 		do
-			if [ -x "$dir/$COMMAND" -a ! \
-				-d "$dir/$COMMAND" ]
+			if [ -x "$dir/$COMMAND" -a \
+			     ! -d "$dir/$COMMAND" ]
 			then
 				echo "$dir/$COMMAND"
 				FOUND=TRUE
 				break
 			fi
-			done
-			;;
+		done
+		;;
 esac
 
 if [ "$FOUND" = "FALSE" ]; then
-	echo "$COMMAND not found"
+	echo "$COMMAND not found" 1>&2
 	exit 2
 else
 	exit 0

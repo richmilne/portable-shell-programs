@@ -28,34 +28,9 @@
 #	1	Error - see the message written to standard error.
 #
 ####################################################################
-CMDNAME=`basename $0`
-USAGE="Usage: $CMDNAME [-dfv] file [directory ...]"
-VERBOSE=		# Verbose option
-TYPE=			# Type option to find(1) command.
-
-#
-# Parse command options.
-#
-if [ "$OPTIND" = 1 ]; then
-	while getopts dfv OPT
-	do
-		case $OPT in
-			d)	TYPE="-type d"
-				;;
-			f)	TYPE="-type f"
-				;;
-			v)	VERBOSE=TRUE
-				;;
-			\?)	echo "$USAGE" 1>&2
-				exit 1
-				;;
-		esac
-	done
-	shift `expr $OPTIND - 1`
-else
-	echo "$CMDNAME: getopts is not supported." 1>&2
-	exit 1
-fi
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME fileName [directory ...]"
+NAME=			# File being searched for.
 
 if [ $# -eq 0 ]; then
 	echo "$USAGE" 1>&2
@@ -65,11 +40,4 @@ fi
 NAME=$1
 shift
 
-if [ "$VERBOSE" = "TRUE" ]; then
-	find "${@:-.}" $TYPE -name "$NAME" -print
-else
-	find "${@:-.}" $TYPE -name "$NAME" -print 2>&1 |
-		grep -v "Permission denied"
-fi
-
-exit 0
+find "${@:-.}" -name "$NAME" -follow -print

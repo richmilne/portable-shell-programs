@@ -6,7 +6,7 @@
 #	findstr - search for files that contain a string
 #
 # SYNOPSIS
-#	findstr [-iv] string [filename]
+#	findstr [-iv] string [fileName]
 #
 # DESCRIPTION
 #	This command searches the files in the current directory and
@@ -29,7 +29,7 @@
 #		findstr foo "*.c"
 #
 # OPTIONS
-#	-i   Ignore the case of the string.
+#	-i	Ignore the case of the string.
 #
 #	-v	Verbose.  Print the lines that contain the string in
 #		addition to the names of the files.
@@ -41,56 +41,26 @@
 #	1	Error - see the message written to standard error.
 #
 ####################################################################
-CMDNAME=`basename $0`
-USAGE="Usage: $CMDNAME [-iv] string [filename]"
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [-iv] string [fileName]"
 STRING=			# String being search for.
 FILENAME=		# Name of the files to check.
 I=			# Option for grep; Ignore case.
 L=-l			# Option for grep; List names only.
 
-#
-# Parse command options.
-#
-if [ "$OPTIND" = 1 ]; then
-	while getopts iv OPT
-	do
-		case $OPT in
-			i)	I=-i	# Ignore case
-				;;
-			v)	L=	# Verbose
-				;;
-			\?)	echo "$USAGE" 1>&2
-				exit 1
-				;;
-		esac
-	done
-	shift `expr $OPTIND - 1`
-else
-	USAGE="Usage: $CMDNAME [-i][-v] string [filename]"
-	while :
-	do
-		case $1 in
-			-i)	I=-i	# Ignore case
-				shift
-				;;
-			-v)	L=	# Verbose
-				shift
-				;;
-			--)	shift
-				break
-				;;
-			-*)	echo "$USAGE" 1>&2
-				exit 1
-				;;
-			*)	break
-				;;
-		esac
-	done
-fi
+while getopts iv OPT
+do
+	case $OPT in
+		i)	I=-i	;;	# Ignore case
+		v)	L=	;;	# Verbose
 
-#
-# Make sure the number of parameters is reasonable.
-#
+		\?)	echo "$USAGE" 1>&2
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+
 if [ $# -lt 1 -o $# -gt 2 ]; then
 	echo "$USAGE" 1>&2
 	exit 1
@@ -99,8 +69,7 @@ fi
 STRING=$1
 FILENAME=${2:-"*"}
 
-find . \( -type f -o -type l \) -name "$FILENAME" -print |
-	sed -e 's/^/"/' -e 's/$/"/'			 |
-	xargs -e grep $I $L -- "$STRING" /dev/null
-
-exit 0
+find . \( -type f -o -type l \) -name "$FILENAME" -follow -print |
+	sort							 |
+	sed -e 's/^/"/' -e 's/$/"/'				 |
+	xargs -e grep -E $I $L -- "$STRING" /dev/null

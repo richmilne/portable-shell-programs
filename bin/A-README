@@ -6,8 +6,6 @@ provided with this code.
 
 The following files are contained in this directory:
 
-	A-README		this file
-
 Chapter 1
 	append			Append to file.
 
@@ -17,34 +15,30 @@ Chapter 10
 	GetYesNo.sh		Ask a "yes" or "no" question.
 	IsNewer.sh		Compare the dates of two files.
 	IsNumeric.sh		Determine if a string is numeric.
+	Process.sh		Process information utilities.
 	Prompt.sh		Print a message without a newline.
 	Question.sh		Ask a question.
-	CheckHostname.sh	determine if a hostname is valid
-	DownShift.sh		downshift the characters in a string
-	StrCmp.sh		compare two strings
-	SystemType.sh		return the type of the system
-	IsSystemType.sh		compare string with current system
-	SpaceAvail.sh		determine the space available in a directory
-	SpaceUsed.sh		determine the space used by a directory
-	decimal2hex.sh		convert decimal number to hexadecimal
-	hex2decimal.sh		convert hexadecimal number to decimal
-	IsSuperuser.sh		determine if current user is superuser
+	Strings.sh		String utilities.
+	tty.sh			Utilities for printing to terminals.
 
 Chapter 11
 	Cat			Concatenate files.
 	DirCmp			Compare the files in two directories.
+	Exec			Execute a command.
 	Kill			Kill a process (send signal) by name.
-	MkDir			create directory and missing path components
+	Rsh			Execute a command on a remote system.
 	Shar			Create a shell archive.
 	Wc			Recursive version of the wc command.
 	addcolumn		Add a column of numbers.
+	cpid			Print the process IDs of child processes.
 	dircopy			Copy a directory.
 	findcmd			Search for a command.
 	findfile		Search for a file.
-
+	findprocess		Find a process by name.
 	findstr			Search files for a string.
-	hostaddr		return the IP address for a system
+	number			Convert a number to a different radix.
+	pcommand		Print the command line executed by a process.
+	pname			Print the name of a process.
+	ppid			Print the process ID of the parent process.
 	ptree			Print a process tree.
-	MailPkg			package files for mailing
-
-
+	replace			Replace a string in multiple files.

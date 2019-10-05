@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+# Copyright (c) 2008 by Bruce Blinn
+#
+# NAME
+#	replace - replace one string with another in files
+#
+# SYNOPSIS
+#	replace [-nv] oldString newString file ...
+#
+# DESCRIPTION
+#	This command will replace the old string with the new
+#	string in all the files listed.
+#
+# OPTIONS
+#	-n	Show the changes that would be made, but do not
+#		modify the file(s).
+#
+#	-v	Verbose.  Print the names of the files that are
+#		modified.
+#
+# RETURN VALUE
+#	0	Successful completion.
+#	1	Error - see the message written to standard error.
+#
+####################################################################
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [-nv] oldString newString file ...."
+SEP=			# Separator for sed command.
+OLD=			# Old string.
+NEW=			# New string.
+MODIFY=TRUE		# Do not modify files; -n option.
+VERBOSE=FALSE		# Verbose option; -v option.
+TMP=/tmp/tmp.$$		# Temporary file.
+
+trap 'rm -f /tmp/*.$$' EXIT
+
+while getopts nv OPT
+do
+	case $OPT in
+		n)	MODIFY=FALSE	;;
+		v)	VERBOSE=TRUE	;;
+
+		\?)	echo "$USAGE" 1>&2
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -lt 3 ]; then
+	echo "$USAGE" 1>&2
+	exit 1
+fi
+
+OLD=$1
+NEW=$2
+shift 2
+
+for c in '/' ';' '@'
+do
+	case "$OLD$NEW" in
+		*$c* )	;;
+		* )	SEP=$c
+			break
+			;;
+	esac
+done
+if [ "$SEP" = "" ]; then
+	echo "$CMDNAME: Cannot find a separator." 1>&2
+	exit 1
+fi
+
+for f
+do
+	if [ ! -f "$f" ]; then
+		echo "$f is not a file; skipping." 1>&2
+		continue
+	fi
+
+	sed "s${SEP}$OLD${SEP}$NEW${SEP}g" "$f" >"$TMP"
+	cmp -s "$f" "$TMP"
+	if [ $? -ne 0 ]; then
+		if [ "$MODIFY" = "TRUE" ]; then
+			if [ "$VERBOSE" = "TRUE" ]; then
+				echo "Changing $f"
+			fi
+			cp "$TMP" "$f"
+		else
+			echo "Changing $f"
+			diff "$f" "$TMP"
+		fi
+	fi
+done

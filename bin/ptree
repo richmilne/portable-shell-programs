@@ -40,54 +40,44 @@
 #	1	Error - see the message written to standard error.
 #
 ####################################################################
-CMDNAME=`basename $0`
-USAGE="Usage: $CMDNAME [-n] [pid]"
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [-v][-k | -signal | -s signal] processID"
+VERBOSE=FALSE		# Verbose option.
+VOPT=			# Verbose option for recursion.
+SIGNAL=			# Signal to send to the processes.
 PID=			# PID of the starting process.
 LEVEL=			# Indentation level (num parents).
+MYPID=			# Process ID of this command.
 INDENT=			# Column number where line begins.
 LINE=			# Line of output.
 NAME=			# Name of the process.
-PATH=$PATH:`dirname $0`
-RECURSIVE=TRUE		# List processes recursively
-PROCESS=		# PID of the starting process
-DATAFILE=		# Reformatted output from ps
-PSFILE=/tmp/ps.$$	# Output from the ps command
-PS_OPTS=		# Options for the ps command
-OLD_IFS=$IFS		# Original value of IFS variable
-SYSTEM=`SystemType`	# String identifying the system
+CHILDREN=		# PIDs of children.
+CHILD=			# Iteration variable for CHILDREN.
 
-#
-# Temporaries
-#
-PPID=			# Process ID of the parent process
-OWNER=			# Owner of the process
-OUTLINE=		# Line of output
-
-. SystemType.sh
-
-trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
-
-FillLine() {
-	#
-	# SYNOPSIS
-	#	FillLine line column
-	#
-	_LINE="$1"
-	_COLUMN=$2
-	_LEN=`expr "$_LINE" : '.*'`
-	while [ $_LEN -lt $_COLUMN ]
-	do
-		_LINE="$_LINE "
-		_COLUMN=`expr $_COLUMN - 1`
-	done
-
-	echo "$_LINE"
-}
+. Process.sh
+. Strings.sh
 
 while :
 do
 	case $1 in
-		-n)	RECURSIVE=FALSE
+		-[1-9]*)
+			SIGNAL="$1"
+			shift
+			;;
+		-SIG*)	SIGNAL="$1"
+			shift
+			;;
+		-k)	SIGNAL="-s SIGTERM"
+			shift
+			;;
+		-s)	SIGNAL="-s $2"
+			shift 2
+			;;
+		-s*)	SIGNAL="$1"
+			shift
+			;;
+		-v)	VERBOSE=TRUE
+			VOPT="-v"
 			shift
 			;;
 		--)	shift
@@ -101,102 +91,53 @@ do
 	esac
 done
 
-#
-# Make sure the number of parameters is reasonable.
-#
-if [ $# -eq 0 ]; then
-	PROCESS=1
+if [ $# -eq 1 ]; then
+	PID=$1
 	LEVEL=0
-	DATAFILE=/tmp/ptree.$$
-elif [ $# -eq 1 ]; then
-	PROCESS=$1
-	LEVEL=0
-	DATAFILE=/tmp/ptree.$$
+	MYPID=$$
 elif [ $# -eq 3 ]; then
-	PROCESS=$1
+	PID=$1
 	LEVEL=$2
-	DATAFILE=$3
+	MYPID=$3
 else
 	echo "$USAGE" 1>&2
 	exit 1
 fi
 
-if [ "$LEVEL" = 0 ]; then
-	#
-	# Determine which options to use with the ps command.
-	#
-	case $SYSTEM in
-		SUNBSD | ULTRIX )	PS_OPTS="-auwx"	;;
-		* )			PS_OPTS="-ef"	;;
-	esac
-
-	#
-	# Build the data file.
-	#
-	rm -f $DATAFILE $PSFILE
-	ps -ef | sed '1d' | sort >$PSFILE
-
-	exec <$PSFILE
-	IFS=
-	while read LINE
-	do
-		IFS=$OLD_IFS
-
-		set $LINE
-		OWNER=$1
-		PID=$2
-		PPID=$3
-
-		#
-		# Determine column where the process name begins.
-		#
-		case $SYSTEM in
-			AIX | HP | SGI | SOLARIS )	COL=48 ;;
-			SUNBSD | DECOSF )		COL=57 ;;
-			ULTRIX )			COL=51 ;;
-			* )	echo "Unexpected system type." 1>&2
-				exit 1
-				;;
-		esac
-
-		LINE=`echo "$LINE" | cut -c$COL-`
-		set dummy $LINE
-		shift
-		NAME=$1
-
-		echo $PID $PPID $OWNER $NAME >>$DATAFILE
-		IFS=
-	done
-	IFS=$OLD_IFS
+if [ "$VERBOSE" = "TRUE" ]; then
+	NAME=$(pcommand $PID)
+else
+	NAME=$(pname $PID)
 fi
 
-INDENT=`expr $LEVEL \* 2`
-OUTLINE=`FillLine "" $INDENT`
-
-LINE=`grep "^$PROCESS " $DATAFILE`
-set $LINE
-OUTLINE="$OUTLINE  $1"
-OUTLINE=`FillLine "$OUTLINE" 30`
-OUTLINE="$OUTLINE  $3	$4"
-echo "$OUTLINE"
+INDENT=$((LEVEL * 2))
+LINE=$(StrFill $INDENT "")
+LINE="$LINE$PID"
+LINE=$(StrFill 30 "$LINE")
+LINE="$LINE$NAME"
+echo "$LINE"
 
 #
-# Print the current process.
+# Do not print the children of this command; it will cause an
+# infinite loop.
 #
-if [ "$RECURSIVE" = "TRUE" ];then
-	LEVEL=`expr $LEVEL + 1`
-	while read LINE
-	do
-		set $LINE
+if [ "$PID" = "$MYPID" ]; then
+	exit 0
+fi
+
+CHILDREN=$(cpid $PID)
+if [ "$CHILDREN" != "" ]; then
 	#
 	# For every process that is a child of the current process,
 	# invoke this command ($0) recursively.
 	#
-		if [ "$2" = "$PROCESS" ]; then
-			$0 $1 $LEVEL $DATAFILE
-		fi
-	done <$DATAFILE
+	LEVEL=$((LEVEL + 1))
+	for CHILD in $CHILDREN
+	do
+		$0 $VOPT $SIGNAL $CHILD $LEVEL $MYPID
+	done
 fi
 
-rm -f /tmp/*.$$
-exit 0
+if [ "$SIGNAL" != "" ]; then
+	kill $SIGNAL $PID
+fi

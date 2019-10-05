@@ -27,12 +27,12 @@
 #	2	The directories are not the same.
 #
 ####################################################################
-CMDNAME=`basename $0`
+CMDNAME=$(basename $0)
 USAGE="Usage: $CMDNAME [-v] [dir1] dir2"
 VERBOSE=FALSE			# Verbose option.
-CURDIR=`pwd`			# Current directory.
+CURDIR=$(pwd)			# Current directory.
 FOUND=FALSE			# Differences found?
-FIRST=				# Has header been printed?
+HEADER_PRINTED=			# Has header been printed?
 DIR1=				# Name of source directory.
 DIR2=				# Name of target directory.
 DIR1_FILES=/tmp/files1.$$	# List of files in dir1.
@@ -41,31 +41,20 @@ ALL_FILES=/tmp/allfiles.$$	# List of files in dir1 or dir2.
 COMMON_FILES=/tmp/comfiles.$$	# List of files in dir1 and dir2.
 TMP=/tmp/tmp.$$			# Temporary file.
 
-trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
+trap 'rm -f /tmp/*.$$' EXIT
 
-#
-# Parse the command options.
-#
-while :
+while getopts v OPT
 do
-	case $1 in
-		-v)	VERBOSE=TRUE
-			shift
+	case $OPT in
+		v)	VERBOSE=TRUE
 			;;
-		--)	shift
-			break
-			;;
-		-*)	echo "$USAGE" 1>&2
+		\?)	echo "$USAGE" 1>&2
 			exit 1
-			;;
-		*)	break
 			;;
 	esac
 done
+shift $((OPTIND - 1))
 
-#
-# Get command line arguments.
-#
 if [ $# -eq 1 ]; then
 	DIR1="."
 	DIR2="$1"
@@ -77,33 +66,29 @@ else
 	exit 1
 fi
 
-#
-# Check the directories.
-#
 if [ ! -d $DIR1 ]; then
 	echo "$DIR1 is not a directory." 1>&2
-	exit 2
+	exit 1
 fi
 
 if [ ! -d $DIR2 ]; then
 	echo "$DIR2 is not a directory." 1>&2
-	exit 2
+	exit 1
 fi
 
 #
 # Create the lists of files to compare.
 #
 cd $DIR1
-find . \( -type f -o -type l \) -print | sort >$DIR1_FILES
+find . \( -type f -o -type l \) -print	|
+	sed "s/^..//" >$DIR1_FILES
 cd $CURDIR
 
 cd $DIR2
-find . \( -type f -o -type l \) -print | sort >$DIR2_FILES
+find . \( -type f -o -type l \) -print	|
+	sed "s/^..//" >$DIR2_FILES
 cd $CURDIR
 
-#
-# Build a list of all files.
-#
 cat $DIR1_FILES $DIR2_FILES | sort | uniq	>$ALL_FILES
 cat $DIR1_FILES $DIR2_FILES | sort | uniq -d	>$COMMON_FILES
 
@@ -115,9 +100,8 @@ if [ -s $TMP ]; then
 	FOUND=TRUE
 	echo ""
 	echo "Files missing from $DIR1:"
-	for f in `cat $TMP`
+	for f in $(cat $TMP)
 	do
-		f=`expr $f : '..\(.*\)'`
 		echo "	$f"
 	done
 fi
@@ -130,9 +114,8 @@ if [ -s $TMP ]; then
 	FOUND=TRUE
 	echo ""
 	echo "Files missing from $DIR2:"
-	for f in `cat $TMP`
+	for f in $(cat $TMP)
 	do
-		f=`expr $f : '..\(.*\)'`
 		echo "	$f"
 	done
 fi
@@ -141,15 +124,14 @@ fi
 # Print the files that are in dir1 and dir2, but are not
 # the same.
 #
-FIRST=TRUE
-for f in `cat $COMMON_FILES`
+HEADER_PRINTED=FALSE
+for f in $(cat $COMMON_FILES)
 do
 	cmp -s $DIR1/$f $DIR2/$f
 	if [ $? -ne 0 ]; then
 		FOUND=TRUE
-		f=`expr $f : '..\(.*\)'`
-		if [ "$FIRST" = "TRUE" ]; then
-			FIRST=FALSE
+		if [ "$HEADER_PRINTED" != "TRUE" ]; then
+			HEADER_PRINTED=TRUE
 			echo ""
 			echo "Files that are not the same:"
 		fi
@@ -164,7 +146,6 @@ do
 	fi
 done
 
-rm -f /tmp/*.$$
 if [ $FOUND = TRUE ]; then
 	exit 2
 else

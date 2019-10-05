@@ -18,9 +18,11 @@
 #	1	Error - see the message written to standard error.
 #
 ####################################################################
-CMDNAME=`basename $0`
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [column]"
+
 if [ $# -gt 1 ]; then
-	echo "Usage: $CMDNAME [column]" 1>&2
+	echo "$USAGE" 1>&2
 	exit 1
 fi
 

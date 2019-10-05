@@ -18,20 +18,23 @@
 #		written to standard error.
 #
 ####################################################################
+CMDNAME=$(basename $0)
 ERROR=0			# Has there been an error (0=no, 1=yes)?
 LINE=			# Line read from file.
+OLD_IFS=$IFS
 
 while [ $# -gt 0 ]
 do
 	if [ ! -r "$1" ]; then
-		echo "Cannot find file $1" 1>&2
+		echo "$CMDNAME: Cannot find file $1" 1>&2
 		ERROR=1
 	else
 		IFS=
-		while read LINE
+		while read -r LINE
 		do
 			echo "$LINE"
 		done <"$1"
+		IFS=$OLD_IFS
 	fi
 	shift
 done
