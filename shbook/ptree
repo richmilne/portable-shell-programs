@@ -32,16 +32,17 @@
 #    0    Successful completion
 #    1    Usage error
 #
-############################################################
-PATH=$PATH:`dirname $0`
-
-. SystemType.sh
-
+####################################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-n] [pid]"
+PID=                     # Process ID
+LEVEL=                   # Indentation level (num parents)
+INDENT=                  # Column number where line begins
+LINE=                    # Line from the data file
+NAME=                    # Name of the process
+PATH=$PATH:`dirname $0`
 RECURSIVE=TRUE           # List processes recursively
 PROCESS=                 # PID of the starting process
-LEVEL=                   # Indentation level (num parents)
 DATAFILE=                # Reformatted output from ps
 PSFILE=/tmp/ps.$$        # Output from the ps command
 PS_OPTS=                 # Options for the ps command
@@ -51,13 +52,11 @@ SYSTEM=`SystemType`      # String identifying the system
 #
 # Temporaries
 #
-PID=                     # Process ID
 PPID=                    # Process ID of the parent process
 OWNER=                   # Owner of the process
-NAME=                    # Name of the process
-LINE=                    # Line from the data file
 OUTLINE=                 # Line of output
-INDENT=                  # Column number where line begins
+
+. SystemType.sh
 
 trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
 
@@ -164,9 +163,6 @@ if [ "$LEVEL" = 0 ]; then
      IFS=$OLD_IFS
 fi
 
-#
-# Print the current process.
-#
 INDENT=`expr $LEVEL \* 2`
 OUTLINE=`FillLine "" $INDENT`
 
@@ -177,6 +173,9 @@ OUTLINE=`FillLine "$OUTLINE" 30`
 OUTLINE="$OUTLINE  $3	$4"
 echo "$OUTLINE"
 
+#
+# Print the current process.
+#
 if [ "$RECURSIVE" = "TRUE" ];then
      LEVEL=`expr $LEVEL + 1`
      while read LINE

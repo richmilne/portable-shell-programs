@@ -33,17 +33,18 @@
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-v] directory1 directory2"
 CURDIR=`pwd`                  # Current directory
-TARGET=                       # Destination directory
 V=                            # Verbose option to tar
+TARGET=                       # Destination directory
+
 
 while :
 do
 	case $1 in
-		--)	shift
-			break
-			;;
 		-v)	V="v"
 			shift
+			;;
+		--)	shift
+			break
 			;;
 		-*)	# An illegal option was found.
 			echo $USAGE 1>&2

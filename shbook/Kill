@@ -37,19 +37,15 @@
 #    30 Oct 00  Added w option to ps command for Linux.
 #
 ############################################################
-PATH=$PATH:`dirname $0`
-
-. SystemType.sh
-. GetYesNo.sh
-
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-signal] ProcessName"
-OLD_IFS=$IFS             # Original value of IFS variable
 SIGNAL=                  # Optional signal; see kill(1)
 NAME=                    # Name of process to kill
 PID=                     # PID of process being checked
-PROCNAME=                # Name of process being checked
 OWNER=                   # Owner of process being checked
+PATH=$PATH:`dirname $0`
+OLD_IFS=$IFS             # Original value of IFS variable
+PROCNAME=                # Name of process being checked
 PS_OPTS=                 # Options for ps command
 PROCESS_LIST=/tmp/list.$$ # Output of ps command
 TITLE_PRINTED=FALSE      # Title printed? (TRUE or FALSE)
@@ -57,6 +53,9 @@ FOUND=FALSE              # Found matching process?
 LINE=                    # Single line of output from ps
 COL=                     # Column where process name begins
 SYSTEM=`SystemType`      # String identifying the system
+
+. SystemType.sh
+. GetYesNo.sh
 
 trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
 

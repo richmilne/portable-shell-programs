@@ -37,14 +37,14 @@
 #
 ############################################################
 CMDNAME=`basename $0`
+FOUND=FALSE
+
 if [ $# -ne 1 ]; then
      echo "Usage: $CMDNAME command" 1>&2
      exit 1
 fi
 
-FOUND=FALSE
 COMMAND=$1
-
 case $COMMAND in
      */* )     if [ -x "$COMMAND" -a ! -d "$COMMAND" ]; then
                     echo "$COMMAND"

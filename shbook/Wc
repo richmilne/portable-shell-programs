@@ -47,18 +47,18 @@
 ############################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-c][-l][-w] [file | directory ...]"
-TMP=/tmp/Wc.$$           # Temporary file for output of wc
-LINE=                    # Line read from file
-DIR=                     # Top level directory
-PATTERN=                 # File name matching pattern
-C=                       # Suppress newline of echo (Sys V)
-N=                       # Suppress newline of echo (BSD)
 COUNT_LINES=FALSE        # Display the number of lines?
 COUNT_WORDS=FALSE        # Display the number of words?
 COUNT_CHARS=FALSE        # Display the number of characters?
 LINES=0                  # Cumulative line count
 WORDS=0                  # Cumulative word count
 CHARS=0                  # Cumulative character count
+DIR=                     # Top level directory
+PATTERN=                 # File name matching pattern
+TMP=/tmp/Wc.$$           # Temporary file for output of wc
+LINE=                    # Line read from file
+C=                       # Suppress newline of echo (Sys V)
+N=                       # Suppress newline of echo (BSD)
 
 trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
 

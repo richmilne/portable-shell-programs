@@ -40,8 +40,10 @@
 ############################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-v] [dir1] dir2"
-
+VERBOSE=FALSE
 CURDIR=`pwd`                  # Current directory
+FOUND=FALSE                   # Differences found?
+FIRST=
 DIR1=                         # Source directory
 DIR2=                         # Target directory
 DIR1_FILES=/tmp/files1.$$     # Files in dir1
@@ -49,9 +51,6 @@ DIR2_FILES=/tmp/files2.$$     # Files in dir2
 ALL_FILES=/tmp/allfiles.$$    # Files in dir1 or dir2
 COMMON_FILES=/tmp/comfiles.$$ # Files in dir1 and dir2
 TMP=/tmp/tmp.$$               # Temporary file
-FOUND=FALSE                   # Differences found?
-FIRST=
-VERBOSE=FALSE
 
 trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
 

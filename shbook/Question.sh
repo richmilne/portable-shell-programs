@@ -61,15 +61,16 @@ Question() {
      #    for yes or no questions, and the default answer
      #    will be returned if the user enters a return.
      #    
+     _QUESTION=          # Question as it will be printed
+     _DEFAULT=$2         # Default answer
+     _HELPMSG=$3         # Text of the help message
+     ANSWER=             # Global variable for answer
+
      if [ $# -lt 3 ]; then
           echo "Usage: Question question" \
                "default helpmessage" 1>&2
           exit 1
      fi
-     ANSWER=             # Global variable for answer
-     _DEFAULT=$2         # Default answer
-     _QUESTION=          # Question as it will be printed
-     _HELPMSG=$3         # Text of the help message
 
      if [ "$_DEFAULT" = "" ]; then
           _QUESTION="$1? "
