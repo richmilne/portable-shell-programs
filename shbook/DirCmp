@@ -1,56 +1,45 @@
 #!/bin/sh
 #
-# Copyright 1995, by Hewlett-Packard Company
-#
-# The code in this file is from the book "Portable Shell
-# Programming" by Bruce Blinn, published by Prentice Hall.
-# This file may be copied free of charge for personal,
-# non-commercial use provided that this notice appears in
-# all copies of the file.  There is no warranty, either
-# expressed or implied, supplied with this code.
+# Copyright (c) 2008 by Bruce Blinn
 #
 # NAME
-#    DirCmp - compare the files in two directories
+#	DirCmp - compare the files in two directories
 #
 # SYNOPSIS
-#    DirCmp [-v] [dir1] dir2
+#	DirCmp [-v] [dir1] dir2
 #
 # DESCRIPTION
-#    This command compares the files in two directories and
-#    lists the files that are not the same.  There will be
-#    three separate lists for: 
+#	This command compares the files in two directories and lists
+#	the files that are not the same.  There will be three
+#	separate lists for:
 #
-#    1. Files not in the first directory, but in the second
-#    2. Files not in the second directory, but in the first
-#    3. Files in both directories, but not the same
+#	1. Files not in the first directory, but in the second.
+#	2. Files not in the second directory, but in the first.
+#	3. Files in both directories, but not the same.
 #
-#    -v   Verbose option.  This option prints the lines that
-#         are different rather than just the name of the
-#         file when the file is in both directories, but the
-#         files are not the same.
-#
+# OPTIONS
+#	-v	Verbose.  For files that are in both directories but
+#		not the same, print the lines that are different
+#		in addition to the name of the file.
 # RETURN VALUE
-#    0    The directories are the same
-#    1    Usage error or abnormal termination
-#    2    The directories are not the same
+#	0	The directories are the same.
+#	1	Error - see the message written to standard error.
+#	2	The directories are not the same.
 #
-# CHANGES
-#    14 Jun 00  Fix type: changed "exit2" to "exit 2".
-#
-############################################################
+####################################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-v] [dir1] dir2"
-VERBOSE=FALSE
-CURDIR=`pwd`                  # Current directory
-FOUND=FALSE                   # Differences found?
-FIRST=
-DIR1=                         # Source directory
-DIR2=                         # Target directory
-DIR1_FILES=/tmp/files1.$$     # Files in dir1
-DIR2_FILES=/tmp/files2.$$     # Files in dir2
-ALL_FILES=/tmp/allfiles.$$    # Files in dir1 or dir2
-COMMON_FILES=/tmp/comfiles.$$ # Files in dir1 and dir2
-TMP=/tmp/tmp.$$               # Temporary file
+VERBOSE=FALSE			# Verbose option.
+CURDIR=`pwd`			# Current directory.
+FOUND=FALSE			# Differences found?
+FIRST=				# Has header been printed?
+DIR1=				# Name of source directory.
+DIR2=				# Name of target directory.
+DIR1_FILES=/tmp/files1.$$	# List of files in dir1.
+DIR2_FILES=/tmp/files2.$$	# List of files in dir2.
+ALL_FILES=/tmp/allfiles.$$	# List of files in dir1 or dir2.
+COMMON_FILES=/tmp/comfiles.$$	# List of files in dir1 and dir2.
+TMP=/tmp/tmp.$$			# Temporary file.
 
 trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
 
@@ -59,50 +48,50 @@ trap 'rm -f /tmp/*.$$; exit 1' 1 2 3 15
 #
 while :
 do
-     case $1 in
-          -v)  VERBOSE=TRUE
-               shift
-               ;;
-          --)  shift
-               break
-               ;;
-          -*)  echo "$USAGE" 1>&2
-               exit 1
-               ;;
-          *)   break
-               ;;
-     esac
+	case $1 in
+		-v)	VERBOSE=TRUE
+			shift
+			;;
+		--)	shift
+			break
+			;;
+		-*)	echo "$USAGE" 1>&2
+			exit 1
+			;;
+		*)	break
+			;;
+	esac
 done
 
 #
 # Get command line arguments.
 #
 if [ $# -eq 1 ]; then
-     DIR1="."
-     DIR2="$1"
+	DIR1="."
+	DIR2="$1"
 elif [ $# -eq 2 ]; then
-     DIR1="$1"
-     DIR2="$2"
+	DIR1="$1"
+	DIR2="$2"
 else
-     echo "$USAGE" 1>&2
-     exit 1
+	echo "$USAGE" 1>&2
+	exit 1
 fi
 
 #
 # Check the directories.
 #
 if [ ! -d $DIR1 ]; then
-     echo "$DIR1 is not a directory." 1>&2
-     exit 2
+	echo "$DIR1 is not a directory." 1>&2
+	exit 2
 fi
 
 if [ ! -d $DIR2 ]; then
-     echo "$DIR2 is not a directory." 1>&2
-     exit 2
+	echo "$DIR2 is not a directory." 1>&2
+	exit 2
 fi
 
 #
-# Find the files to compare.
+# Create the lists of files to compare.
 #
 cd $DIR1
 find . \( -type f -o -type l \) -print | sort >$DIR1_FILES
@@ -115,22 +104,22 @@ cd $CURDIR
 #
 # Build a list of all files.
 #
-cat $DIR1_FILES $DIR2_FILES | sort | uniq    >$ALL_FILES
-cat $DIR1_FILES $DIR2_FILES | sort | uniq -d >$COMMON_FILES
+cat $DIR1_FILES $DIR2_FILES | sort | uniq	>$ALL_FILES
+cat $DIR1_FILES $DIR2_FILES | sort | uniq -d	>$COMMON_FILES
 
 #
 # Print the files that are in dir2, but not in dir1.
 #
 cat $DIR1_FILES $ALL_FILES | sort | uniq -u >$TMP
 if [ -s $TMP ]; then
-     FOUND=TRUE
-     echo ""
-     echo "Files missing from $DIR1:"
-     for f in `cat $TMP`
-     do
-          f=`expr $f : '..\(.*\)'`
-          echo "	$f"
-     done
+	FOUND=TRUE
+	echo ""
+	echo "Files missing from $DIR1:"
+	for f in `cat $TMP`
+	do
+		f=`expr $f : '..\(.*\)'`
+		echo "	$f"
+	done
 fi
 
 #
@@ -138,14 +127,14 @@ fi
 #
 cat $DIR2_FILES $ALL_FILES | sort | uniq -u >$TMP
 if [ -s $TMP ]; then
-     FOUND=TRUE
-     echo ""
-     echo "Files missing from $DIR2:"
-     for f in `cat $TMP`
-     do
-          f=`expr $f : '..\(.*\)'`
-          echo "	$f"
-     done
+	FOUND=TRUE
+	echo ""
+	echo "Files missing from $DIR2:"
+	for f in `cat $TMP`
+	do
+		f=`expr $f : '..\(.*\)'`
+		echo "	$f"
+	done
 fi
 
 #
@@ -155,30 +144,30 @@ fi
 FIRST=TRUE
 for f in `cat $COMMON_FILES`
 do
-     cmp -s $DIR1/$f $DIR2/$f
-     if [ $? -ne 0 ]; then
-          FOUND=TRUE
-          f=`expr $f : '..\(.*\)'`
-          if [ "$FIRST" = "TRUE" ]; then
-               FIRST=FALSE
-               echo ""
-               echo "Files that are not the same:"
-          fi
+	cmp -s $DIR1/$f $DIR2/$f
+	if [ $? -ne 0 ]; then
+		FOUND=TRUE
+		f=`expr $f : '..\(.*\)'`
+		if [ "$FIRST" = "TRUE" ]; then
+			FIRST=FALSE
+			echo ""
+			echo "Files that are not the same:"
+		fi
 
-          if [ "$VERBOSE" = "TRUE" ]; then
-               echo ""
-               echo "File: $f"
-               diff $DIR1/$f $DIR2/$f
-          else
-               echo "	$f"
-          fi
-     fi
+		if [ "$VERBOSE" = "TRUE" ]; then
+			echo ""
+			echo "File: $f"
+			diff $DIR1/$f $DIR2/$f
+		else
+			echo "	$f"
+		fi
+	fi
 done
 
 rm -f /tmp/*.$$
 if [ $FOUND = TRUE ]; then
-     exit 2
+	exit 2
 else
-     echo "The directories are the same."
-     exit 0
+	echo "The directories are the same."
+	exit 0
 fi

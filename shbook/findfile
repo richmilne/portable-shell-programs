@@ -1,54 +1,37 @@
 #!/bin/sh
 #
-# Copyright 1995, by Hewlett-Packard Company
-#
-# The code in this file is from the book "Portable Shell
-# Programming" by Bruce Blinn, published by Prentice Hall.
-# This file may be copied free of charge for personal,
-# non-commercial use provided that this notice appears in
-# all copies of the file.  There is no warranty, either
-# expressed or implied, supplied with this code.
+# Copyright (c) 2008 by Bruce Blinn
 #
 # NAME
-#    findfile - recursively search for a file
+#	findfile - search for a file
 #
 # SYNOPSIS
-#    findfile [-dfv] name [directory ...]
+#	findfile fileName [directory ...]
 #
 # DESCRIPTION
-#    This command searches the directories and their
-#    subdirectories for the file.  If no directories are
-#    listed on the command line, the current directory is
-#    searched.  If the file is found, the path name of the
-#    file is printed.
+#	This command searches the specified directories and their
+#	subdirectories for the file.  If no directories are listed
+#	on the command line, the current directory is searched.  If
+#	the file is found, the path name of the file is printed.
 #
-#    If the file name contains wildcard characters, it must
-#    be quoted so that the wildcard characters can be
-#    processed inside this shell script rather than being
-#    expanded into file names on the command line.
+#	The file name may contain wildcard characters, but if it
+#	does, it must be quoted so that the wildcard characters will
+#	be processed inside this shell script rather than being
+#	expanded into file names on the command line.  For example:
 #
-#    -d   Only find directories; default is to find files and
-#         directories that match the name.
-#    -f   Only find files; default is to find files and
-#         directories that match the name.
-#    -v   Verbose; by default, this command suppresses error
-#         messages caused by attempting to access directories
-#         and file that you do not have access to.  The verbose
-#         option will cause these messages to be printed.
+#		findfile "*.c"
 #
 # RETURN VALUE
-#    0    Successful completion
-#    1    Usage error
+#	0	Successful completion.  It is not an error if the
+#		file is not found.
 #
-# CHANGES
-#    15 Jun 00  Added v option.
-#    28 Jun 00  Added d and f options.
+#	1	Error - see the message written to standard error.
 #
-############################################################
+####################################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-dfv] file [directory ...]"
-VERBOSE=                 # Verbose option
-TYPE=                    # Type option to find(1) command.
+VERBOSE=		# Verbose option
+TYPE=			# Type option to find(1) command.
 
 #
 # Parse command options.
@@ -75,8 +58,8 @@ else
 fi
 
 if [ $# -eq 0 ]; then
-     echo "$USAGE" 1>&2
-     exit 1
+	echo "$USAGE" 1>&2
+	exit 1
 fi
 
 NAME=$1

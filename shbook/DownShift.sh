@@ -13,19 +13,19 @@
 #
 
 DownShift() {
-     #
-     # NAME
-     #    DownShift - downshift the characters in a string
-     #
-     # SYNOPSIS
-     #    DownShift string
-     #
-     # DESCRIPTION
-     #    This function will downshift the alphabetic
-     #    characters in the string.  Nonalphabetic
-     #    characters will not be affected.  The downshifted
-     #    string will be written to the standard output.
-     #    
+	#
+	# NAME
+	#	DownShift - downshift the characters in a string
+	#
+	# SYNOPSIS
+	#	DownShift string
+	#
+	# DESCRIPTION
+	#	This function will downshift the alphabetic
+	#	characters in the string.  Nonalphabetic
+	#	characters will not be affected.  The downshifted
+	#	string will be written to the standard output.
+	#	
 
-     echo "$@" | tr '[A-Z]' '[a-z]'
+	echo "$@" | tr '[A-Z]' '[a-z]'
 }

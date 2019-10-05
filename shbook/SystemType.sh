@@ -12,54 +12,54 @@
 # expressed or implied, supplied with this code.
 #
 # CHANGES
-#    26 May 00  Updated for Linux.
+#	26 May 00  Updated for Linux.
 #
 
 SystemType() {
-     #
-     # NAME
-     #    SystemType - return the type of the system
-     #
-     # SYNOPSIS
-     #    SystemType
-     #
-     # DESCRIPTION
-     #    This function determines the type of the system on
-     #    which it is executing and returns one of the
-     #    following strings:
-     #    
-     #         AIX       DECOSF    HP        LINUX     SCO
-     #         SGI       SOLARIS   SUNBSD    ULTRIX
-     #
-     #    ULTRIX is returned for Digital Equipment's older
-     #    BSD systems and DECOSF is returned for their OSF
-     #    based systems.
-     #
-     #    SUNBSD is returned for Sun BSD systems (versions
-     #    4.*) and SOLARIS is returned for Sun System V
-     #    systems (versions 5.*).
-     #
-     #    If this function is unable to determine the type
-     #    of the system, it will return an empty string.
-     #
-     _HOSTNAME=`hostname | sed 's/\..*//'`
+	#
+	# NAME
+	#	SystemType - return the type of the system
+	#
+	# SYNOPSIS
+	#	SystemType
+	#
+	# DESCRIPTION
+	#	This function determines the type of the system on
+	#	which it is executing and returns one of the
+	#	following strings:
+	#	
+	#		AIX	DECOSF	HP	LINUX	SCO
+	#		SGI	SOLARIS	SUNBSD	ULTRIX
+	#
+	#	ULTRIX is returned for Digital Equipment's older
+	#	BSD systems and DECOSF is returned for their OSF
+	#	based systems.
+	#
+	#	SUNBSD is returned for Sun BSD systems (versions
+	#	4.*) and SOLARIS is returned for Sun System V
+	#	systems (versions 5.*).
+	#
+	#	If this function is unable to determine the type
+	#	of the system, it will return an empty string.
+	#
+	_HOSTNAME=`hostname | sed 's/\..*//'`
 
-     case `uname -s` in
-          AIX )          echo AIX                 ;;
-          HP-UX )        echo HP                  ;;
-          IRIX )         echo SGI                 ;;
-          Linux )        echo LINUX               ;;
-          OSF1 )         echo DECOSF              ;;
-          ULTRIX )       echo ULTRIX              ;;
-          SunOS )        case `uname -r` in
-                              4*)  echo SUNBSD    ;;
-                              5*)  echo SOLARIS   ;;
-                         esac
-                         ;;
-          $_HOSTNAME )   case `uname -m` in
-                              IP*)      echo SGI  ;;
-                              i386)     echo SCO  ;;
-                         esac
-                         ;;
-     esac
+	case `uname -s` in
+		AIX )		echo AIX			;;
+		HP-UX )		echo HP				;;
+		IRIX )		echo SGI			;;
+		Linux )		echo LINUX			;;
+		OSF1 )		echo DECOSF			;;
+		ULTRIX )	echo ULTRIX			;;
+		SunOS )		case `uname -r` in
+					4*)  echo SUNBSD	;;
+					5*)  echo SOLARIS	;;
+				esac
+				;;
+		$_HOSTNAME )	case `uname -m` in
+					IP*)	 echo SGI	;;
+					i386)	echo SCO	;;
+				esac
+				;;
+	esac
 }

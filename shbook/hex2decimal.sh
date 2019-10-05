@@ -11,6 +11,6 @@
 #
 
 hex2decimal() {
-    NUM=`echo $1 | tr '[a-f]' '[A-F]'`
-    echo 16i $NUM p | dc
+	NUM=`echo $1 | tr '[a-f]' '[A-F]'`
+	echo 16i $NUM p | dc
 }

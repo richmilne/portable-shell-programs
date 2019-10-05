@@ -20,9 +20,9 @@ tar -cf /tmp/package.$$ $*
 
 mkdir /tmp/split.$$
 cd /tmp/split.$$
-compress /tmp/package.$$      |
-     uuencode $PACKAGE.tar.Z  |
-     split -1000
+compress /tmp/package.$$	 |
+	uuencode $PACKAGE.tar.Z  |
+	split -1000
 
 PARTNUM=1
 MESSAGE=/tmp/message.$$
@@ -30,21 +30,21 @@ set x*
 TOTAL=$#
 while [ $# -gt 0 ]
 do
-    cat <<_EOF >$MESSAGE
-    This is part $PARTNUM of $TOTAL of a compressed and
-    uuencoded tar file.
-    -   File: $PACKAGE.tar.Z
-    -   Part: $PARTNUM
-    ----- Cut Here -----
-    EOF
+	cat <<_EOF >$MESSAGE
+	This is part $PARTNUM of $TOTAL of a compressed and
+	uuencoded tar file.
+	-   File: $PACKAGE.tar.Z
+	-   Part: $PARTNUM
+	----- Cut Here -----
+	EOF
 
-    cat $1                      >>$MESSAGE
-    echo "----- Cut Here -----" >>$MESSAGE
+	cat $1				>>$MESSAGE
+	echo "----- Cut Here -----"	>>$MESSAGE
 
-    mail $ADDRESS <$MESSAGE
+	mail $ADDRESS <$MESSAGE
 
-    shift
-    PARTNUM=`expr $PARTNUM + 1`
+	shift
+	PARTNUM=`expr $PARTNUM + 1`
 done
 
 rm /tmp/package.$$

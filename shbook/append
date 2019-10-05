@@ -1,17 +1,13 @@
 #!/bin/sh
 #
-# Copyright 1995, by Hewlett-Packard Company
+# Copyright (c) 2008 by Bruce Blinn
 #
-# The code in this file is from the book "Portable Shell
-# Programming" by Bruce Blinn, published by Prentice Hall.
-# This file may be copied free of charge for personal,
-# non-commercial use provided that this notice appears in
-# all copies of the file.  There is no warranty, either
-# expressed or implied, supplied with this code.
+# SYNOPSIS
+#	Append [fromfile] tofile
 #
 
 case $# in
-    1 ) cat >> $1 ;;
-    2 ) cat $1 >> $2 ;;
-    * ) echo "Usage: append [fromfile] tofile" 1>&2 ;;
+	1 ) cat >> $1 ;;
+	2 ) cat $1 >> $2 ;;
+	* ) echo "Usage: append [fromfile] tofile" 1>&2 ;;
 esac

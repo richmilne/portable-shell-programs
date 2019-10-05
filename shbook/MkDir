@@ -10,42 +10,42 @@
 # expressed or implied, supplied with this code.
 #
 # NAME
-#    MkDir - create a directory and missing path components
+#	MkDir - create a directory and missing path components
 #
 # SYNOPSIS
-#    MkDir directory
+#	MkDir directory
 #
 # DESCRIPTION
-#    This command will create the directory and any missing
-#    path components leading up to the directory.
+#	This command will create the directory and any missing
+#	path components leading up to the directory.
 #
 # RETURN VALUE
-#    0    Successful completion
-#    >0   Usage error or error status returned from the
-#         mkdir command
+#	0	Successful completion
+#	>0	Usage error or error status returned from the
+#		mkdir command
 #
 ############################################################
 CMDNAME=`basename $0`
 if [ $# -ne 1 ]; then
-     echo "Usage: $CMDNAME directory" 1>&2
-     exit 1
+	echo "Usage: $CMDNAME directory" 1>&2
+	exit 1
 fi
 
 case $1 in
-     /*)  DIR=      ;;
-     *)   DIR=.     ;;
+	/*)  DIR=	;;
+	*)   DIR=.	;;
 esac
 
 IFS=/
 for d in $1
 do
-     DIR="$DIR/$d"
-     if [ ! -d "$DIR" ]; then
-          mkdir "$DIR"
-          if [ $? -ne 0 ]; then
-               exit $?
-          fi
-     fi
+	DIR="$DIR/$d"
+	if [ ! -d "$DIR" ]; then
+		mkdir "$DIR"
+		if [ $? -ne 0 ]; then
+			exit $?
+		fi
+	fi
 done
 
 exit 0

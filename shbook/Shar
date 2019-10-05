@@ -1,38 +1,31 @@
 #!/bin/sh
 #
-# Copyright 1995, by Hewlett-Packard Company
-#
-# The code in this file is from the book "Portable Shell
-# Programming" by Bruce Blinn, published by Prentice Hall.
-# This file may be copied free of charge for personal,
-# non-commercial use provided that this notice appears in
-# all copies of the file.  There is no warranty, either
-# expressed or implied, supplied with this code.
+# Copyright (c) 2008 by Bruce Blinn
 #
 # NAME
-#    Shar - create a shell archive
+#	Shar - create a shell archive
 #
 # SYNOPSIS
-#    Shar file [...]
+#	Shar file ...
 #
 # DESCRIPTION
-#    This command creates a shell archive that contains the
-#    files listed on the command line.  The shell archive
-#    is written to the standard output.  To unpack the
-#    archive, enter the following command, where archive is
-#    the name of the shell archive.
+#	This command creates a shell archive that contains the files
+#	listed on the command line.  The shell archive is written to
+#	the standard output.  To unpack the shell archive, enter the
+#	following command, where archive is the name of the shell
+#	archive.
 #
-#         sh archive
+#		sh archive
 #
 # RETURN VALUE
-#    0    Successful completion
-#    1    Usage error
+#	0	Successful completion.
+#	1	Error - see the message written to standard error.
 #
-############################################################
+####################################################################
 CMDNAME=`basename $0`
 if [ $# -lt 1 ]; then
-     echo "Usage: $CMDNAME file ..." 1>&2
-     exit 1
+	echo "Usage: $CMDNAME file ..." 1>&2
+	exit 1
 fi
 
 echo "#!/bin/sh"
@@ -46,20 +39,20 @@ echo "#"
 
 for FILE
 do
-     echo "#    $FILE"
+	echo "#	$FILE"
 done
 
 for FILE
 do
-     echo ""
-     echo "if [ -f $FILE ]; then"
-     echo "    echo The file $FILE already exists."
-     echo "else"
-     echo "    echo Extracting $FILE"
-     echo "    sed 's/^X//' >$FILE <<\EOF"
-     sed 's/^/X/' <$FILE
-     echo "EOF"
-     echo "fi"
+	echo ""
+	echo "if [ -f $FILE ]; then"
+	echo "	echo The file $FILE already exists."
+	echo "else"
+	echo "	echo Extracting $FILE"
+	echo "	sed 's/^X//' >$FILE <<\EOF"
+	sed 's/^/X/' <$FILE
+	echo "EOF"
+	echo "fi"
 done
 echo "exit 0"
 

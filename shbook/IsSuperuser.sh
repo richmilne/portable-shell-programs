@@ -11,8 +11,8 @@
 #
 
 IsSuperuser() {
-    case `id` in
-        "uid=0("* )  return 0     ;;
-        * )          return 1     ;;
-    esac
+	case `id` in
+		"uid=0("* )	return 0	;;
+		* )		return 1	;;
+	esac
 }

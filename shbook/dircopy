@@ -1,40 +1,32 @@
 #!/bin/sh
 #
-# Copyright 1995, by Hewlett-Packard Company
-#
-# The code in this file is from the book "Portable Shell
-# Programming" by Bruce Blinn, published by Prentice Hall.
-# This file may be copied free of charge for personal,
-# non-commercial use provided that this notice appears in
-# all copies of the file.  There is no warranty, either
-# expressed or implied, supplied with this code.
+# Copyright (c) 2008 by Bruce Blinn
 #
 # NAME
-#    dircopy - copy the contents of a directory
+#	dircopy - copy a directory
 #
 # SYNOPSIS
-#    dircopy [-v] directory1 directory2
+#	dircopy [-v] directory1 directory2
 #
 # DESCRIPTION
-#    This command will copy the contents of one directory
-#    to another.  The destination directory and any
-#    subdirectories will be created as needed.
+#	This command will copy the contents of one directory to
+#	another.  The destination directory and any subdirectories
+#	will be created as needed.
 #
-#    -v   Verbose; list the files as they are being copied.
+# OPTIONS
+#	-v	Verbose.  Print the names of the files as they are
+#		being copied.
 #
 # RETURN VALUE
-#    0    Successful completion
-#    1    Usage error
+#	0	Successful completion.
+#	1	Error - see the message written to standard error.
 #
-# CHANGES
-#    23 Jun 00  Added verbose (-v) option.
-#
-############################################################
+####################################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-v] directory1 directory2"
-CURDIR=`pwd`                  # Current directory
-V=                            # Verbose option to tar
-TARGET=                       # Destination directory
+CURDIR=`pwd`		# Current directory.
+V=			# Verbose option to tar.
+TARGET=			# Destination directory.
 
 
 while :
@@ -55,22 +47,22 @@ do
 	esac
 done
 if [ $# -ne 2 ]; then
-     echo "$USAGE" 1>&2
-     exit 1
+	echo "$USAGE" 1>&2
+	exit 1
 fi
 
 if [ ! -d "$1" ]; then
-     echo "$1 is not a directory." 1>&2
-     exit 1
+	echo "$1 is not a directory." 1>&2
+	exit 1
 fi
 
 if [ -f "$2" ]; then
-     echo "$2 is not a directory." 1>&2
-     exit 1
+	echo "$2 is not a directory." 1>&2
+	exit 1
 fi
 
 if [ ! -d "$2" ]; then
-     mkdir -p "$2"
+	mkdir -p "$2"
 fi
 
 cd "$2"
@@ -78,6 +70,6 @@ TARGET=`pwd`
 cd $CURDIR
 
 cd "$1"
-find . -depth -print            |
-     cpio -pdmu$V $TARGET 2>&1  |
-     grep -iv "blocks"
+find . -depth -print		  |
+	cpio -pdmu$V $TARGET 2>&1  |
+	grep -iv "blocks"

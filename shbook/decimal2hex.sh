@@ -11,5 +11,5 @@
 #
 
 decimal2hex() {
-    echo 16o $1 p | dc
+	echo 16o $1 p | dc
 }

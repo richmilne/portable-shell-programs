@@ -11,20 +11,20 @@
 #
 
 SpaceUsed() {
-    DIRECTORY=$1
-    SYSTEM=`SystemType`
-    case $SYSTEM in
-        SUNBSD | ULTRIX )
-            SPACE=`du -s $DIRECTORY
-            ;;
-        HP | SGI | SOLARIS | DECOSF )
-            SPACE=`du -s $DIRECTORY
-            SPACE=`expr $SPACE / 2`
-            ;;
-        * ) echo "Unexpected system type ($SYSTEM)." 1>&2
-            exit 1
-            ;;
-    esac
+	DIRECTORY=$1
+	SYSTEM=`SystemType`
+	case $SYSTEM in
+		SUNBSD | ULTRIX )
+			SPACE=`du -s $DIRECTORY
+			;;
+		HP | SGI | SOLARIS | DECOSF )
+			SPACE=`du -s $DIRECTORY
+			SPACE=`expr $SPACE / 2`
+			;;
+		* ) echo "Unexpected system type ($SYSTEM)." 1>&2
+			exit 1
+			;;
+	esac
 
-    echo $SPACE
+	echo $SPACE
 }
