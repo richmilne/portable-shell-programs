@@ -11,6 +11,9 @@
 # all copies of the file.  There is no warranty, either
 # expressed or implied, supplied with this code.
 #
+# CHANGES
+#    26 May 00  Updated for Linux.
+#
 
 SystemType() {
      #
@@ -25,7 +28,7 @@ SystemType() {
      #    which it is executing and returns one of the
      #    following strings:
      #    
-     #         AIX       DECOSF    HP        SCO
+     #         AIX       DECOSF    HP        LINUX     SCO
      #         SGI       SOLARIS   SUNBSD    ULTRIX
      #
      #    ULTRIX is returned for Digital Equipment's older
@@ -45,6 +48,7 @@ SystemType() {
           AIX )          echo AIX                 ;;
           HP-UX )        echo HP                  ;;
           IRIX )         echo SGI                 ;;
+          Linux )        echo LINUX               ;;
           OSF1 )         echo DECOSF              ;;
           ULTRIX )       echo ULTRIX              ;;
           SunOS )        case `uname -r` in

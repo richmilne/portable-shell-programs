@@ -13,7 +13,7 @@
 #    findfile - recursively search for a file
 #
 # SYNOPSIS
-#    findfile file [directory ...]
+#    findfile [-dfv] name [directory ...]
 #
 # DESCRIPTION
 #    This command searches the directories and their
@@ -27,18 +27,66 @@
 #    processed inside this shell script rather than being
 #    expanded into file names on the command line.
 #
+#    -d   Only find directories; default is to find files and
+#         directories that match the name.
+#    -f   Only find files; default is to find files and
+#         directories that match the name.
+#    -v   Verbose; by default, this command suppresses error
+#         messages caused by attempting to access directories
+#         and file that you do not have access to.  The verbose
+#         option will cause these messages to be printed.
+#
 # RETURN VALUE
 #    0    Successful completion
 #    1    Usage error
 #
+# CHANGES
+#    15 Jun 00  Added v option.
+#    28 Jun 00  Added d and f options.
+#
 ############################################################
 CMDNAME=`basename $0`
+USAGE="Usage: $CMDNAME [-dfv] file [directory ...]"
+VERBOSE=                 # Verbose option
+TYPE=                    # Type option to find(1) command.
+
+#
+# Parse command options.
+#
+if [ "$OPTIND" = 1 ]; then
+	while getopts dfv OPT
+	do
+		case $OPT in
+			d)	TYPE="-type d"
+				;;
+			f)	TYPE="-type f"
+				;;
+			v)	VERBOSE=TRUE
+				;;
+			\?)	echo "$USAGE" 1>&2
+				exit 1
+				;;
+		esac
+	done
+	shift `expr $OPTIND - 1`
+else
+	echo "$CMDNAME: getopts is not supported." 1>&2
+	exit 1
+fi
+
 if [ $# -eq 0 ]; then
-     echo "Usage: $CMDNAME file [directory ...]" 1>&2
+     echo "$USAGE" 1>&2
      exit 1
 fi
 
 NAME=$1
 shift
 
-find "${@:-.}" -name "$NAME" -print
+if [ "$VERBOSE" = "TRUE" ]; then
+	find "${@:-.}" $TYPE -name "$NAME" -print
+else
+	find "${@:-.}" $TYPE -name "$NAME" -print 2>&1 |
+		grep -v "Permission denied"
+fi
+
+exit 0

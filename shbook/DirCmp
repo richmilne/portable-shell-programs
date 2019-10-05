@@ -34,6 +34,9 @@
 #    1    Usage error or abnormal termination
 #    2    The directories are not the same
 #
+# CHANGES
+#    14 Jun 00  Fix type: changed "exit2" to "exit 2".
+#
 ############################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-v] [dir1] dir2"
@@ -91,12 +94,12 @@ fi
 #
 if [ ! -d $DIR1 ]; then
      echo "$DIR1 is not a directory." 1>&2
-     exit2
+     exit 2
 fi
 
 if [ ! -d $DIR2 ]; then
      echo "$DIR2 is not a directory." 1>&2
-     exit2
+     exit 2
 fi
 
 #

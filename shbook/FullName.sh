@@ -11,6 +11,12 @@
 # all copies of the file.  There is no warranty, either
 # expressed or implied, supplied with this code.
 #
+# CHANGES
+#    19 Jul 00  Use /bin/pwd instead of shell built-in.  This
+#               will print the real path vs. the path you used
+#               to arrive there when symbolic links are
+#               traversed.
+#
 
 FullName() {
      #
@@ -37,10 +43,10 @@ FullName() {
 
      if [ -d $1 ]; then
           cd $1
-          echo `pwd`
+          echo `/bin/pwd`
      elif [ -f $1 ]; then
           cd `dirname $1`
-          echo `pwd`/`basename $1`
+          echo `/bin/pwd`/`basename $1`
      else
           echo $1
      fi

@@ -44,6 +44,11 @@
 #    0    Successful completion
 #    1    Usage error
 #
+# CHANGES
+#    4 Dec 00  Add a sed filter to quote the arguments from
+#              find so that file names that contain
+#              whitespace will be handled correctly.
+#
 ############################################################
 CMDNAME=`basename $0`
 USAGE="Usage: $CMDNAME [-iv] string [filename]"
@@ -104,6 +109,7 @@ STRING=$1
 FILENAME=${2:-"*"}
 
 find . \( -type f -o -type l \) -name "$FILENAME" -print |
+     sed -e 's/^/"/' -e 's/$/"/'                         |
      xargs -e grep $I $L -- "$STRING" /dev/null
 
 exit 0

@@ -13,24 +13,48 @@
 #    dircopy - copy the contents of a directory
 #
 # SYNOPSIS
-#    dircopy directory1 directory2
+#    dircopy [-v] directory1 directory2
 #
 # DESCRIPTION
 #    This command will copy the contents of one directory
 #    to another.  The destination directory and any
 #    subdirectories will be created as needed.
 #
+#    -v   Verbose; list the files as they are being copied.
+#
 # RETURN VALUE
 #    0    Successful completion
 #    1    Usage error
 #
+# CHANGES
+#    23 Jun 00  Added verbose (-v) option.
+#
 ############################################################
 CMDNAME=`basename $0`
+USAGE="Usage: $CMDNAME [-v] directory1 directory2"
 CURDIR=`pwd`                  # Current directory
 TARGET=                       # Destination directory
+V=                            # Verbose option to tar
 
+while :
+do
+	case $1 in
+		--)	shift
+			break
+			;;
+		-v)	V="v"
+			shift
+			;;
+		-*)	# An illegal option was found.
+			echo $USAGE 1>&2
+			exit 1
+			;;
+		*)	break
+			;;
+	esac
+done
 if [ $# -ne 2 ]; then
-     echo "Usage: $CMDNAME directory1 directory2" 1>&2
+     echo "$USAGE" 1>&2
      exit 1
 fi
 
@@ -53,6 +77,6 @@ TARGET=`pwd`
 cd $CURDIR
 
 cd "$1"
-find . -depth -print          |
-     cpio -pdmu $TARGET 2>&1  |
+find . -depth -print            |
+     cpio -pdmu$V $TARGET 2>&1  |
      grep -iv "blocks"

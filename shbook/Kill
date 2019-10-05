@@ -32,6 +32,10 @@
 #    0    Successful completion
 #    1    Usage error or abnormal termination
 #
+# CHANGES
+#    26 May 00  Updated for Linux.
+#    30 Oct 00  Added w option to ps command for Linux.
+#
 ############################################################
 PATH=$PATH:`dirname $0`
 
@@ -78,7 +82,7 @@ NAME=$1        # Get the name of the process to kill.
 #
 case $SYSTEM in
      SUNBSD | ULTRIX ) PS_OPTS="-auxw"     ;;
-     * )               PS_OPTS="-ef"       ;;
+     * )               PS_OPTS="-efw"      ;;
 esac
 
 #
@@ -110,6 +114,7 @@ do
      # Determine the column where the process name begins.
      #
      case $SYSTEM in
+          LINUX )                       COL=49 ;;
           AIX | HP | SGI | SOLARIS )    COL=48 ;;
           SUNBSD | DECOSF )             COL=57 ;;
           ULTRIX )                      COL=51 ;;
