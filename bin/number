@@ -1,0 +1,86 @@
+#!/bin/sh
+#
+# Copyright (c) 2008 by Bruce Blinn
+#
+# NAME
+#	number - convert a number to a different radix
+#
+# SYNOPSIS
+#	number [-dho] number
+#
+# DESCRIPTION
+#	This command will convert a number to a different radix.
+#	The radix of the original number will be determined by its
+#	prefix:
+#
+#		0x or 0X	hexadecimal
+#		0		octal
+#		other		decimal
+#
+# OPTIONS
+#	The radix to convert the number to is determined by the
+#	option.  If no option is specified, the number will be
+#	converted to decimal.
+#
+#	-d	Convert the number to decimal.
+#	-h	Convert the number to hexadecimal.
+#	-o	Convert the number to octal.
+#
+# RETURN VALUE
+#	0	Successful completion.
+#	1	Error - see the message written to standard error.
+#
+####################################################################
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [-dho] number"
+NUMBER=			# The number being converted.
+RADIX=10		# Radix of result.
+
+while getopts dho OPT
+do
+	case $OPT in
+		d)	RADIX=10	;;
+		h)	RADIX=16	;;
+		o)	RADIX=8		;;
+
+		\?)	echo "$USAGE" 1>&2
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -ne 1 ]; then
+	echo $USAGE 1>&2
+	exit 1
+fi
+
+#
+# Upshift the number.
+#
+NUMBER=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+
+#
+# Convert to decimal.
+#
+case $NUMBER in
+	0X* | *[ABCDEF]* )
+		NUMBER=$(echo $NUMBER | sed "s/^0X//")
+		NUMBER=$(echo "ibase=16; $NUMBER" | bc)
+		;;
+	0* )	NUMBER=$(echo $NUMBER | sed "s/^0//")
+		NUMBER=$(echo "ibase=8; $NUMBER" | bc)
+		;;
+esac
+
+#
+# Convert to output radix.
+#
+case $RADIX in
+	8 )	NUMBER=0$(echo "obase=8; $NUMBER" | bc)
+		;;
+	16 )	NUMBER=0x$(echo "obase=16; $NUMBER" | bc)
+		;;
+esac
+
+echo $NUMBER

@@ -22,54 +22,56 @@
 #	1	Error - see the message written to standard error.
 #
 ####################################################################
-CMDNAME=`basename $0`
+CMDNAME=$(basename $0)
 USAGE="Usage: $CMDNAME [-v] directory1 directory2"
-CURDIR=`pwd`		# Current directory.
+CURDIR=$(pwd)		# Current directory.
 V=			# Verbose option to tar.
-TARGET=			# Destination directory.
+DIR1=			# Source directory.
+DIR2=			# Destination directory.
+ERRMSG=/tmp/errmsg.$$	# Error messages from cpio.
 
+trap 'rm -f /tmp/*.$$' EXIT
 
-while :
+while getopts v OPT
 do
-	case $1 in
-		-v)	V="v"
-			shift
+	case $OPT in
+		v)	V="v"
 			;;
-		--)	shift
-			break
-			;;
-		-*)	# An illegal option was found.
-			echo $USAGE 1>&2
+		\?)	echo "$USAGE" 1>&2
 			exit 1
-			;;
-		*)	break
 			;;
 	esac
 done
+shift $((OPTIND - 1))
+
 if [ $# -ne 2 ]; then
 	echo "$USAGE" 1>&2
 	exit 1
 fi
 
-if [ ! -d "$1" ]; then
-	echo "$1 is not a directory." 1>&2
+DIR1=$1
+DIR2=$2
+
+if [ ! -d "$DIR1" ]; then
+	echo "$DIR1 is not a directory." 1>&2
 	exit 1
 fi
 
-if [ -f "$2" ]; then
-	echo "$2 is not a directory." 1>&2
-	exit 1
+if [ ! -d "$DIR2" ]; then
+	mkdir -p "$DIR2"
+	if [ $? -ne 0 ]; then
+		echo "$CMDNAME: Cannot create $DIR2" 1>&2
+		exit 1
+	fi
 fi
 
-if [ ! -d "$2" ]; then
-	mkdir -p "$2"
-fi
-
-cd "$2"
-TARGET=`pwd`
+cd "$DIR2"
+DIR2=$(pwd)
 cd $CURDIR
 
-cd "$1"
-find . -depth -print		  |
-	cpio -pdmu$V $TARGET 2>&1  |
-	grep -iv "blocks"
+cd $DIR1
+find . -depth -print | cpio -pdmu$V $DIR2 2>$ERRMSG
+if [ $? -ne 0 ]; then
+	cat $ERRMSG 1>&2
+	exit 1
+fi

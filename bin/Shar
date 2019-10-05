@@ -22,15 +22,17 @@
 #	1	Error - see the message written to standard error.
 #
 ####################################################################
-CMDNAME=`basename $0`
-if [ $# -lt 1 ]; then
-	echo "Usage: $CMDNAME file ..." 1>&2
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME file ..."
+
+if [ $# -eq 0 ]; then
+	echo "$USAGE" 1>&2
 	exit 1
 fi
 
 echo "#!/bin/sh"
 echo "# This is a shell archive; to unpack:"
-echo "# 1. Remove everything before the \"#!/bin/sh\"."
+echo "# 1. Remove everything before \"#!/bin/sh\"."
 echo "# 2. Save the rest of the archive."
 echo "# 3. Execute the archive by entering \"sh archive\"."
 echo "#"
@@ -54,6 +56,3 @@ do
 	echo "EOF"
 	echo "fi"
 done
-echo "exit 0"
-
-exit 0

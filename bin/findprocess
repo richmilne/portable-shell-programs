@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Copyright (c) 2008 by Bruce Blinn
+#
+# NAME
+#	findprocess - find a process by name
+#
+# SYNOPSIS
+#	findprocess name
+#
+# DESCRIPTION
+#	Print the process IDs of all processes with the specified
+#	name.
+#
+# RETURN VALUE
+#	0	Successful completion.  It is not an error if the
+#		process is not found.
+#
+#	1	Error - see the message written to standard error.
+#
+####################################################################
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME name"
+NAME=			# Process being searched for.
+export UNIX95=		# For POSIX version of ps command on HP-UX.
+
+if [ $# -ne 1 ]; then
+	echo "$USAGE" 1>&2
+	exit 1
+fi
+
+NAME=$1
+ps -e -o "pid comm" | awk '$2 ~/^'$NAME'$/ {print $1}'

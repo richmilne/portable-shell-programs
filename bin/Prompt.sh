@@ -20,7 +20,7 @@ Prompt() {
 	#	If the message is not specified, "> " will be
 	#	printed.
 	#
-	if [ "`echo -n`" = "-n" ]; then
+	if [ "$(echo -n)" = "-n" ]; then
 		echo "${@-> }\c"
 	else
 		echo -n "${@-> }"

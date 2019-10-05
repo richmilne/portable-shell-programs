@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# Copyright (c) 2008 by Bruce Blinn
+#
+# NAME
+#	pname - print the name of a process
+#
+# SYNOPSIS
+#	pname processID
+#
+# DESCRIPTION
+#	Print the name of the specified process.
+#
+# RETURN VALUE
+#	0	Successful completion.
+#	1	Error - see the message written to standard error.
+#
+####################################################################
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME processID"
+NAME=			# Name of the command.
+ARG=			# Name of the shell script.
+export UNIX95=		# For POSIX version of ps command on HP-UX.
+
+if [ $# -ne 1 ]; then
+	echo "$USAGE" 1>&2
+	exit 1
+fi
+
+NAME=$(ps -p $1 -o "comm=")
+
+#
+# On some systems, when an interpreted file is executed, the
+# command name will be the name of the interpreter.  If the
+# command name is sh or ksh, try to find the name of the
+# shell script being executed.
+#
+if [ "$NAME" = "sh" -o "$NAME" = "ksh" ]; then
+	ARG=$(ps -p $1 -o "args="	|
+		awk '{print $2}'	|
+		sed "s/^\.\///")
+
+	case "$ARG" in
+		"" )	echo "$NAME"	;;
+		-* )	echo "$NAME"	;;
+		* )	echo "$ARG"	;;
+	esac
+else
+	echo "$NAME"
+fi

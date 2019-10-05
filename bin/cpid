@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# Copyright (c) 2008 by Bruce Blinn
+#
+# NAME
+#	cpid - print the process IDs of the child processes
+#
+# SYNOPSIS
+#	cpid [-rv] processID [mypid]
+#
+# DESCRIPTION
+#	Print the process ID of the child processes of the specified
+#	process.
+#
+#	NOTE: The mypid parameter should not be used.  It is only
+#	used when this command calls itself recursively to print the
+#	next level of children.
+#
+# OPTIONS
+#	-r	Recursive.  If the -r option is used, the children
+#		of the children will be printed as well.
+#
+#	-v	Verbose.  Print the name of the process in addition
+#		to the process ID.
+#
+# RETURN VALUE
+#	0	Successful completion.
+#	1	Error - see the message written to standard error.
+#
+####################################################################
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [-rv] processID"
+RECURSIVE=FALSE		# Recursive option.
+VERBOSE=FALSE		# Verbose option.
+VOPT=			# Verbose option for recursion.
+PID=			# PID of the parent (original process).
+MYPID=			# Process ID of this command.
+CHILD=			# PID of the child being processed.
+CHILDREN=		# PIDs of all the children.
+export UNIX95=		# For POSIX version of ps command on HP-UX.
+
+while getopts rv OPT
+do
+	case $OPT in
+		r)	RECURSIVE=TRUE
+			;;
+		v)	VERBOSE=TRUE
+			VOPT="-v"
+			;;
+		\?)	echo "$USAGE" 1>&2
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -eq 1 ]; then
+	PID=$1
+	MYPID=$$
+elif [ $# -eq 2 ]; then
+	PID=$1
+	MYPID=$2
+else
+	echo "$USAGE" 1>&2
+	exit 1
+fi
+
+CHILDREN=$(ps -e -o "ppid pid" | awk '$1 ~ /^'$PID'$/ {print $2}')
+if [ "$CHILDREN" != "" ]; then
+	for CHILD in $CHILDREN
+	do
+		# Do not find the children of this command; it will
+		# cause an infinite loop.
+		if [ "$PID" = "$MYPID" ]; then
+			continue
+		fi
+
+		if [ "$VERBOSE" = "TRUE" ]; then
+			echo "$CHILD	$(pname $CHILD)"
+		else
+			echo $CHILD
+		fi
+
+		if [ "$RECURSIVE" = "TRUE" ]; then
+			$0 $VOPT -r $CHILD $MYPID
+		fi
+	done
+fi

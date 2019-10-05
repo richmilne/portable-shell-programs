@@ -23,11 +23,11 @@ IsNewer() {
 		exit 1
 	fi
 
-	if [ ! -f $1 -o ! -f $2 ]; then
+	if [ ! -e "$1" -o ! -e "$2" ]; then
 		return 1	# No
 	fi
 
-	if [ -n "`find $1 -newer $2 -print`" ]; then
+	if [ -n "$(find "$1" -newer "$2" -print)" ]; then
 		return 0	# Yes
 	else
 		return 1	# No

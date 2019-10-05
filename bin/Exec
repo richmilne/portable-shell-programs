@@ -1,0 +1,161 @@
+#!/bin/sh
+#
+# Copyright (c) 2008 by Bruce Blinn
+#
+# NAME
+#	Exec - execute a command
+#
+# SYNOPSIS
+#	 Exec [-v] [-c count] [-h hostName] [-l logFile] command
+#
+# DESCRIPTION
+#	This command will execute the command specified on the
+#	command line, but it provides option to control how the
+#	command is executed.
+#
+# OPTIONS
+#	-c count
+#		The number of times to execute the command.  If this
+#		option is used, the current pass number will be
+#		stored in the file /tmp/PASS while the command is
+#		executing.
+#
+#		If the file /tmp/STOP is created while the command
+#		is executing, this command will exit when the
+#		current instance of the command is complete.
+#
+#	-h hostName
+#		The name of the system where the command should be
+#		executed.  If this option is not used, the command
+#		will be executed locally.  No additional quoting is
+#		needed to execute the command on a remote system;
+#		extra quotes will be inserted automatically.  See
+#		the examples below.
+#
+#	-l logFile
+#		The name of the file to save the combined standard
+#		and standard error of the command.  Each time the
+#		command is executed, a separate log file will be
+#		created.  The name of each log file will be appended
+#		with a number corresponding the number of times the
+#		command has been executed.  The log files will be
+#		created on the local system even if the -h option is
+#		used.  The name of the system where the command
+#		should be
+#
+#	-v	Verbose; print the command before that will be
+#		executed.  If the command is executed more than
+#		once, the time and pass number will also be printed.
+#
+# RETURN VALUE
+#	The exit status of this command will be the exit status of
+#	the command specified on the command line.  If the -c option
+#	is used, it will be the exit status of the last instance of
+#	the command.
+#
+#	NOTE: If the rsh or remsh commands are used in place of ssh
+#	for remote execution (see the variable RSH below) and the
+#	-h option is used, the exit status will be the exist status
+#	of the remote shell command, not the exist status of the
+#	command executed on the remote system.
+#
+# EXAMPLE
+#	$ Exec echo  "ab   c"  '"'  "'"
+#	ab   c " '
+#	$ Exec -h localhost echo  "ab   c"  '"'  "'"
+#	ab   c " '
+#
+####################################################################
+CMDNAME=$(basename $0)
+USAGE="Usage: $CMDNAME [-v] [-c cnt] [-h host] [-l logFile] command"
+VERBOSE=FALSE		# Verbose option.
+COUNT=1			# Number of times to execute the command.
+REMOTE=			# Remote command and host for -h option.
+COMMAND=		# Name of command to execute.
+PARAMETERS=		# Parameters for command.
+LOGFILE=		# Name of log file from -l opton.
+STATUS=			# Status last time command was executed.
+PASS=1			# Number of times command has been executed.
+RSH=ssh			# Name of remote shell to use.
+
+Quote() {
+	typeset PARMS=
+	typeset PARM=
+
+	for PARM
+	do
+		#
+		# Replace \ with \\
+		# Replace " with \"
+		#
+		PARMS="$PARMS \"$(echo "$PARM"		|
+				sed 's/\\/\\\\/g'	|
+				sed 's/"/\\"/g')\""
+	done
+
+	# Remove leading space.
+	echo "$PARMS" | sed "s/ //"
+}
+
+trap 'rm -f /tmp/PASS /tmp/STOP' EXIT
+
+while getopts c:h:l:v OPT
+do
+	case $OPT in
+		c)	COUNT=$OPTARG			;;
+		h)	REMOTE="$RSH $OPTARG"		;;
+		l)	LOGFILE=">$OPTARG.\$PASS 2>&1"	;;
+		v)	VERBOSE="TRUE"			;;
+
+		\?)	echo "$USAGE" 1>&2
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -lt 1 ]; then
+	echo "$USAGE" 1>&2
+	exit 1
+fi
+
+COMMAND="$1"
+shift
+
+if [ $# -gt 0 ]; then
+	PARAMETERS=$(Quote "$@")
+
+	# Need an extra set of quotes because the parameters will be
+	# evaluated by two shells: the local shell and the remote
+	# shell.
+	if [ "$REMOTE" != "" ]; then
+		PARAMETERS=$(Quote "$PARAMETERS")
+	fi
+fi
+
+if [ "$COUNT" = 1 ]; then
+	if [ "$VERBOSE" = "TRUE" ]; then
+		echo $REMOTE $COMMAND $PARAMETERS $LOGFILE
+	fi
+
+	eval "$REMOTE $COMMAND $PARAMETERS $LOGFILE"
+	STATUS=$?
+else
+	rm -f /tmp/STOP
+	while [ "$PASS" -le "$COUNT" -a ! -f /tmp/STOP ]
+	do
+		echo "$PASS" >/tmp/PASS
+
+		if [ "$VERBOSE" = "TRUE" ]; then
+			echo "$(date +%X)  $PASS:  " \
+			    "$REMOTE $COMMAND $PARAMETERS $LOGFILE"
+		fi
+
+		eval "$REMOTE $COMMAND $PARAMETERS $LOGFILE"
+		STATUS=$?
+
+		PASS=$((PASS + 1))
+	done
+fi
+
+exit $STATUS

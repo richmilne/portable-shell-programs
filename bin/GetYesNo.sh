@@ -24,7 +24,7 @@ GetYesNo() {
 	#	letters; any other answer will cause the question
 	#	to be repeated.
 	#
-	_ANSWER=            # Answer read from user
+	_ANSWER=		# Answer read from user
 
 	if [ $# -eq 0 ]; then
 		echo "Usage: GetYesNo message" 1>&2
@@ -33,7 +33,7 @@ GetYesNo() {
 
 	while :
 	do
-		if [ "`echo -n`" = "-n" ]; then
+		if [ "$(echo -n)" = "-n" ]; then
 			echo "$@\c"
 		else
 			echo -n "$@"

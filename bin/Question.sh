@@ -56,32 +56,32 @@ Question() {
 	#	Any other answer will be returned exactly as it was
 	#	entered by the user.
 	#
-	_QUESTION=			# Question as it will be printed
-	_DEFAULT=$2			# Default answer
-	_HELPMSG=$3			# Text of the help message
-	ANSWER=				# Global variable for answer
+	_QUESTION=$1		# Question as it will be printed
+	_DEFAULT=$2		# Default answer
+	_HELPMSG=$3		# Text of the help message
+	ANSWER=			# Global variable for answer
 
-	if [ $# -lt 3 ]; then
+	if [ $# -lt 1 -o $# -gt 3 ]; then
 		echo "Usage: Question question" \
-		     "default helpmessage" 1>&2
+		     "[default [helpmessage]]" 1>&2
 		exit 1
 	fi
 
 	if [ "$_DEFAULT" = "" ]; then
-		_QUESTION="$1? "
+		_QUESTION="$_QUESTION? "
 	else
-		_QUESTION="$1 [$_DEFAULT]? "
+		_QUESTION="$_QUESTION [$_DEFAULT]? "
 	fi
 
 	while :
 	do
-		if [ "`echo -n" = "-n" ]; then
+		if [ "$(echo -n)" = "-n" ]; then
 			echo "$_QUESTION\c"
 		else
 			echo -n "$_QUESTION"
 		fi
 		read ANSWER
-		case `echo "$ANSWER" | tr [A-Z] [a-z]` in
+		case $(echo "$ANSWER" | tr '[:upper:]' '[:lower:]') in
 			"" )	if [ "$_DEFAULT" != "" ]; then
 					ANSWER=$_DEFAULT
 					break
@@ -106,7 +106,7 @@ Question() {
 				set $ANSWER
 				;;
 
-			!* )	eval `expr "$ANSWER" : "!\(.*\)"`
+			!* )	eval ${ANSWER#\!}
 				;;
 
 			"?" )	echo ""
